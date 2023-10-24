@@ -1,25 +1,23 @@
-import * as React from 'react';
+// Importerer nødvendige moduler og komponenter fra React Native og Firebase Realtime Database
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
     StyleSheet,
     TextInput,
-    Button,
     Alert,
     ScrollView,
     SafeAreaView,
     TouchableOpacity
 } from 'react-native';
-//import firebase from 'firebase/compat';
-import {useEffect, useState} from "react";
+import { getDatabase, ref, push, update } from "firebase/database";
 
-import { getDatabase, ref, child, push, update  } from "firebase/database";
-
-
-function Add_edit_Office({navigation,route}){
-
+// Komponent til tilføjelse og redigering af kontoroplysninger
+function Add_edit_Office({ navigation, route }) {
+    // Opretter en forbindelse til Firebase Realtime Database
     const db = getDatabase();
 
+    // Initialiserer tilstand for kontoroplysninger
     const initialState = {
         kontor: '',
         by: '',
@@ -27,42 +25,45 @@ function Add_edit_Office({navigation,route}){
         periode: '',
         info: '',
         pris: ''
-    }
+    };
 
-    const [newOffice,setNewOffice] = useState(initialState);
+    // Bruger useState-hook til at håndtere tilstand for kontoroplysninger
+    const [newOffice, setNewOffice] = useState(initialState);
 
-    /*Returnere true, hvis vi er på edit office*/
+    // Tjekker om komponenten bruges til redigering af kontoroplysninger
     const isEditOffice = route.name === "Edit Office";
 
+    // Effekt-hook til at håndtere redigeringstilstand
     useEffect(() => {
-        if(isEditOffice){
+        if (isEditOffice) {
             const office = route.params.office[1];
-            setNewOffice(office)
+            setNewOffice(office);
         }
-        /*Fjern data, når vi går væk fra screenen*/
+        // Rydder tilstanden, når komponenten unmounts
         return () => {
-            setNewOffice(initialState)
+            setNewOffice(initialState);
         };
     }, []);
 
-    const changeTextInput = (name,event) => {
-        setNewOffice({...newOffice, [name]: event});
-    }
+    // Funktion til at opdatere tilstand ved tekstinput-ændringer
+    const changeTextInput = (name, event) => {
+        setNewOffice({ ...newOffice, [name]: event });
+    };
 
+    // Funktion til at håndtere gemme-aktionen
     const handleSave = async () => {
-
         const { kontor, by, addresse, periode, info, pris } = newOffice;
 
-        if(kontor.length === 0 || by.length === 0 || addresse.length === 0 || periode.length === 0 ){
+        // Validerer om påkrævede felter er udfyldt
+        if (kontor.length === 0 || by.length === 0 || addresse.length === 0 || periode.length === 0) {
             return Alert.alert('Et af felterne er tomme!');
         }
 
-        if(isEditOffice){
+        if (isEditOffice) {
+            // Håndterer redigering af kontoroplysninger
             const id = route.params.office[0];
-            // Define the path to the specific office node you want to update
-            const officeRef = ref(db, `Offices/${id}`); //dobbeltjek om stort eller småt
+            const officeRef = ref(db, `Offices/${id}`);
 
-            // Define the fields you want to update
             const updatedFields = {
                 kontor,
                 by,
@@ -71,74 +72,74 @@ function Add_edit_Office({navigation,route}){
                 info,
                 pris,
             };
-            
-            // Use the 'update' function to update the specified fields
+
             await update(officeRef, updatedFields)
                 .then(() => {
-                Alert.alert("Din info er nu opdateret");
-                const office = newOffice
-                navigation.navigate("Office Details", { office });
+                    Alert.alert("Din info er nu opdateret");
+                    const office = newOffice;
+                    navigation.navigate("Office Details", { office });
                 })
                 .catch((error) => {
-                console.error(`Error: ${error.message}`);
+                    console.error(`Fejl: ${error.message}`);
                 });
 
-        }else{
-        // Define the path to the "office" node where you want to push the new data
-        const officesRef = ref(db, "/Offices/");
-        
-        // Data to push
-        const newOfficeData = {
-            kontor,
-            by,
-            addresse,
-            periode,
-            info,
-            pris,
-        };
-        
-        // Push the new data to the "office" node
-        await push(officesRef, newOfficeData)
-            .then(() => {
-            Alert.alert("Saved");
-            setNewOffice(initialState);
-            })
-            .catch((error) => {
-            console.error(`Error: ${error.message}`);
-            });
-    }
+        } else {
+            // Håndterer tilføjelse af nye kontoroplysninger
+            const officesRef = ref(db, "/Offices/");
+
+            const newOfficeData = {
+                kontor,
+                by,
+                addresse,
+                periode,
+                info,
+                pris,
+            };
+
+            await push(officesRef, newOfficeData)
+                .then(() => {
+                    Alert.alert("Gemt");
+                    setNewOffice(initialState);
+                })
+                .catch((error) => {
+                    console.error(`Fejl: ${error.message}`);
+                });
+        }
     };
 
+    // Renderer komponenten med tekstinputfelter og gemmeknap
     return (
         <SafeAreaView style={styles.container}>
-          <ScrollView>
-            {/* Text Inputs */}
-            {Object.keys(initialState).map((key, index) => {
-              return (
-                <View style={styles.row} key={index}>
-                  <Text style={styles.label}>{key}</Text>
-                  <TextInput
-                    value={newOffice[key]}
-                    onChangeText={(event) => changeTextInput(key, event)}
-                    style={styles.input}
-                  />
-                </View>
-              );
-            })}
-    
-            {/* Styled Button */}
-            <TouchableOpacity style={styles.button} onPress={() => handleSave()}>
-              <Text style={styles.buttonText}>
-                {isEditOffice ? 'Save changes' : 'Add office'}
-              </Text>
-            </TouchableOpacity>
-          </ScrollView>
-        </SafeAreaView>
-      );
-    }
+            <ScrollView>
+                {/* Tekstinputfelter */}
+                {Object.keys(initialState).map((key, index) => {
+                    return (
+                        <View style={styles.row} key={index}>
+                            <Text style={styles.label}>{key}</Text>
+                            <TextInput
+                                value={newOffice[key]}
+                                onChangeText={(event) => changeTextInput(key, event)}
+                                style={styles.input}
+                            />
+                        </View>
+                    );
+                })}
 
+                {/* Stylet knap til at gemme ændringer eller tilføje kontoroplysninger */}
+                <TouchableOpacity style={styles.button} onPress={() => handleSave()}>
+                    <Text style={styles.buttonText}>
+                        {isEditOffice ? 'Gem ændringer' : 'Tilføj kontor'}
+                    </Text>
+                </TouchableOpacity>
+            </ScrollView>
+        </SafeAreaView>
+    );
+}
+
+// Eksporterer komponenten som standard eksport fra denne fil
 export default Add_edit_Office;
 
+// Stildefinitioner for komponenten
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
     },
     input: {
         borderWidth: 1,
-        padding:5,
+        padding: 5,
         flex: 1
     },
     button: {
