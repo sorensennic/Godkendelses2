@@ -1,165 +1,114 @@
-import * as React from 'react';
+// Importerer nødvendige moduler og komponenter fra React Native og Expo
+import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Button, SafeAreaView } from 'react-native';
-import  Constants  from 'expo-constants';
-import MapView, {Marker} from 'react-native-maps';
+import Constants from 'expo-constants';
+import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Accuracy } from 'expo-location';
-import { useState, useEffect } from 'react';
 
+// Funktionskomponent for at håndtere lokationsfunktionaliteten
 function LocationComponent() {
-  //Her instantieres alle anvendte statevariabler
-  const [hasLocationPermission, setlocationPermission] = useState(false)
-  const [currentLocation, setCurrentLocation] = useState(null)
-  const [userMarkerCoordinates, setUserMarkerCoordinates] = useState([])
-  const [selectedCoordinate, setSelectedCoordinate] = useState(null)
-  const [selectedAddress, setSelectedAddress] = useState(null)
+  // Initialiserer statevariabler
+  const [hasLocationPermission, setlocationPermission] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [userMarkerCoordinates, setUserMarkerCoordinates] = useState([]);
+  const [selectedCoordinate, setSelectedCoordinate] = useState(null);
+  const [selectedAddress, setSelectedAddress] = useState(null);
 
-  /*
-  * getLocationPermission udnytter den prædefinerede asynkrone metode requestForegroundPermissionsAsync,
-  * som aktiverer en forespørgsel om tilladelse til at benytte enhedens position
-  * resultatet af denne handling leveres og benyttes til at sætte værdien af locationPermission
-  * Værdien sættes pba. af værdien item.granted
-  * Læs mere i dokumentationen:  https://docs.expo.dev/versions/latest/sdk/location/
-  */
+  // Funktion til at anmode om lokationstilladelse
   const getLocationPermission = async () => {
-    await Location.requestForegroundPermissionsAsync().then((item)=>{
-      setlocationPermission(item.granted)
-    } );
-
+    await Location.requestForegroundPermissionsAsync().then((item) => {
+      setlocationPermission(item.granted);
+    });
   };
 
-  // I useEffect kaldes getlocationPermission, der sikrer at enheden forespørger tilladelse
-  // så snart appen kører
-  useEffect (() => {
-    const response = getLocationPermission()
-  });
+  // Effekt-hook til at anmode om lokationstilladelse, når komponenten indlæses
+  useEffect(() => {
+    getLocationPermission();
+  }, []);
 
-  /*
-  * Metoden updateLocation udnytter det prædefinerede asynkrone kald, getCurrentPositionAsync, returnerer enhedens aktuelle position
-  * Resultatet fra kaldet benyttes til at fastsætte værdien af currentlokation.
-  * argumentet, Accuracy.Balanced, angiver den nøjagtighed vi ønsker skal bruges til at angive positionen.
-  * Læs mere på den førnævnte dokumentation
-    */
+  // Funktion til at opdatere brugerens aktuelle lokation
   const updateLocation = async () => {
-    await Location.getCurrentPositionAsync({accuracy: Accuracy.Balanced}).then((item)=>{
-      setCurrentLocation(item.coords)
-    } );
-  };
-  /*
-  * Metoden handleLongPress tager en event med som argument og henter værdien af et koordinatsæt fra denne
-  * Værdien gemmes i en variabel, der tilføjes til et array af koordinater.
-  */
-  const handleLongPress = event => {
-    const coordinate = event.nativeEvent.coordinate
-    setUserMarkerCoordinates((oldArray) => [...oldArray, coordinate])
+    await Location.getCurrentPositionAsync({ accuracy: Accuracy.Balanced }).then((item) => {
+      setCurrentLocation(item.coords);
+    });
   };
 
-  /*
-* Metoden handleSelectMarker tager en koordinat med som argument. Kordinaten bruges
-* til at sætte værdien af selectedCoordinat-variablen
-* Dernæst aktiveres et asynkront kald, i form af den prædefinerede metode, reverseGeocodeAsync.
-* reverseGeocodeAsync omsætter koordinatsættet til en række data, herunder område- og adresse data.
-* selectedAdress sættes til at være resultatet af det asynkrone kald
-*/
-  const handleSelectMarker = async coordinate =>{
-    setSelectedCoordinate(coordinate)
+  // Funktion til at håndtere markører ved langt tryk
+  const handleLongPress = (event) => {
+    const coordinate = event.nativeEvent.coordinate;
+    setUserMarkerCoordinates((oldArray) => [...oldArray, coordinate]);
+  };
+
+  // Funktion til at håndtere valg af en markør og vise adresseoplysninger
+  const handleSelectMarker = async (coordinate) => {
+    setSelectedCoordinate(coordinate);
     await Location.reverseGeocodeAsync(coordinate).then((data) => {
-          setSelectedAddress(data)
-        }
-    )
+      setSelectedAddress(data);
+    });
   };
 
+  // Funktion til at lukke infovinduet med adresseoplysninger
+  const closeInfoBox = () => {
+    setSelectedCoordinate(null);
+    setSelectedAddress(null);
+  };
 
-  //Metoden closeInfoBox nulstiller værdienne fro selectedAddress og selectedCoordinate
-  const closeInfoBox = () =>
-      setSelectedCoordinate(null) && setSelectedAddress(null)
-
-  // RenderCurrentLocation tager props med som argument og tjekker om, der er givet adgang til enhedens lokationsdata
-  // Er der ikke givet adgang returneres der en tekstkomponent med instruktioner til brugeren
-  //Er der givet tilladelse og currenLocation ikke har en værdi, vil der fremvises en knap komponent
-  //Er der givet tilladelse go currentlokation har en værdi, vil lokationsdata blive udskrvet i en infoboks
-  const RenderCurrentLocation = (props) => {
-    if (props.hasLocationPermission === null) {
-      return null;
-    }
-    if (props.hasLocationPermission === false) {
-      return <Text>No location access. Go to settings to change</Text>;
-    }
-    return (
-        <View>
-          <Button style title="Show location" onPress={updateLocation} />
-          {currentLocation && (
-              <Text>
-                {`lat: ${currentLocation.latitude},\nLong:${
-                    currentLocation.longitude
-                }\nacc: ${currentLocation.accuracy}`}
-              </Text>
-          )}
+  // Renderkomponenten
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Viser brugerens aktuelle lokation og en knap til at opdatere lokation */}
+      <RenderCurrentLocation
+        hasLocationPermission={hasLocationPermission}
+        currentLocation={currentLocation}
+      />
+      {/* Viser kortet med brugerens lokation og markerer samt valgte markører */}
+      <MapView
+        provider="google"
+        style={styles.map}
+        showsUserLocation
+        onLongPress={handleLongPress}
+      >
+        {/* Standard markører */}
+        <Marker
+          coordinate={{ latitude: 55.67592993, longitude: 12.57271325 }}
+          title="Accutics"
+          description="Farvergade 17"
+        />
+        <Marker
+          coordinate={{ latitude: 55.67061179, longitude: 12.5817532 }}
+          title="Kontolink"
+          description="Langebrogade 4"
+        />
+        {/* Brugerens tilføjede markører */}
+        {userMarkerCoordinates.map((coordinate, index) => (
+          <Marker
+            coordinate={coordinate}
+            key={index.toString()}
+            onPress={() => handleSelectMarker(coordinate)}
+          />
+        ))}
+      </MapView>
+      {/* Infovindue med valgte markørers adresseoplysninger */}
+      {selectedCoordinate && selectedAddress && (
+        <View style={styles.infoBox}>
+          <Text style={styles.infoText}>
+            {selectedCoordinate.latitude}, {selectedCoordinate.longitude}
+          </Text>
+          <Text style={styles.infoText}>
+            name: {selectedAddress[0].name} region: {selectedAddress[0].region}
+          </Text>
+          <Button title="close" onPress={closeInfoBox} />
         </View>
-    );
-  };
-
-//Slutteligt benyttes SafeAreaView der sikrer at indholdet ikke overskrider grænser for enheden(Kun for IOS enheder version 11 eller nyere )
-  /*
-  * Dernæst kaldes RenderCurrenokation view
-  * Mapview er fremviser et kort, der viser brugerens lokation
-  * Dernæst aktiverer metoden handleLongPress igennem onLongPress
-  * I Mapview vises tre markører ud fra vilkårlige koordinatsæt. Hver markør får en titel og en beskrivelse
-  * Derudover vil alle koordinatsæt i userMarkerCoordinates blive vist som markører på kortet.
-  * For hver af markørerne vil metoden handleSelectMarker blive aktiveret ved onPress,
-  * hvorved selectedCoordinate og selectedAddres får en værdi og der udskrives data om den vaælgte markør
-  *
-  */
-  {
-    return (
-        <SafeAreaView style={styles.container}>
-          <RenderCurrentLocation props={{hasLocationPermission: hasLocationPermission, currentLocation: currentLocation}} />
-          <MapView
-              provider="google"
-              style={styles.map}
-              showsUserLocation
-              onLongPress={handleLongPress}>
-            <Marker
-                coordinate={{ latitude: 55.67592993, longitude: 12.57271325 }}
-                title="Accutics"
-                description="Farvergade 17"
-            />
-            <Marker
-                coordinate={{ latitude: 55.67061179, longitude: 12.5817532 }}
-                title="Kontolink"
-                description="Langebrogade 4"
-            />
-            
-           
-            {userMarkerCoordinates.map((coordinate, index) => (
-                <Marker
-                    coordinate={coordinate}
-                    key={index.toString()}
-                    onPress={() => handleSelectMarker(coordinate)}
-                />
-            ))}
-          </MapView>
-          {selectedCoordinate && selectedAddress && (
-              <View style={styles.infoBox}>
-                <Text style={styles.infoText}>
-                  {selectedCoordinate.latitude}, {selectedCoordinate.longitude}
-                </Text>
-                <Text style={styles.infoText}>
-                  name: {selectedAddress[0].name}  region: {selectedAddress[0].region}
-                </Text>
-                <Button title="close" onPress={closeInfoBox} />
-              </View>
-          )}
-        </SafeAreaView>
-    );
-  }
+      )}
+    </SafeAreaView>
+  );
 }
 
 export default LocationComponent;
 
-
-//Lokal styling til brug i App.js
+// Lokal styling
 const styles = StyleSheet.create({
   container: {
     flex: 1,
