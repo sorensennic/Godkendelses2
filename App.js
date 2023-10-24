@@ -5,11 +5,12 @@ import { getApps, initializeApp } from "firebase/app";
 import {NavigationContainer} from "@react-navigation/native";
 import {createStackNavigator} from "@react-navigation/stack";
 import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
-import Add_edit_Car from './components/Add_edit_Car';
-import CarDetails from './components/CarDetails';
-import CarList from './components/CarList';
 import Ionicons from "react-native-vector-icons/Ionicons";
-
+import Add_edit_Office from './components/Add_edit_Office';
+import OfficeDetails from './components/OfficeDetails';
+import OfficeList from './components/OfficeList';
+import SettingsScreen from './components/SettingsScreen';
+import LocationComponent from './components/LocationComponent';
 
 
 export default function App() {
@@ -36,9 +37,11 @@ export default function App() {
   const StackNavigation = () => {
     return(
         <Stack.Navigator>
-          <Stack.Screen name={'Car List'} component={CarList}/>
-          <Stack.Screen name={'Car Details'} component={CarDetails}/>
-          <Stack.Screen name={'Edit Car'} component={Add_edit_Car}/>
+          <Stack.Screen name={'Office List'} component={OfficeList}/>
+          <Stack.Screen name={'Office Details'} component={OfficeDetails}/>
+          <Stack.Screen name={'Edit Office'} component={Add_edit_Office}/>
+          <Stack.Screen name={'Settings'} component={SettingsScreen} />
+          <Stack.Screen name={'Map Search'} component={LocationComponent} />
         </Stack.Navigator>
     )
   }
@@ -48,8 +51,23 @@ export default function App() {
   return (
     <NavigationContainer>
       <Tab.Navigator>
-        <Tab.Screen name={'Home'} component={StackNavigation} options={{tabBarIcon: () => ( <Ionicons name="home" size={20} />),headerShown:null}}/>
-        <Tab.Screen name={'Add'} component={Add_edit_Car} options={{tabBarIcon: () => ( <Ionicons name="add" size={20} />)}}/>
+        <Tab.Screen name={'View Office list'} component={StackNavigation} options={{tabBarIcon: () => ( <Ionicons name="search-outline" size={20} />),headerShown:null}}/>
+        <Tab.Screen
+        name={'Map Search'} // Add this line
+        component={LocationComponent} // Add this line
+        options={{
+          tabBarIcon: () => <Ionicons name="map-outline" size={20} />, // Icon for the settings tab
+        }}
+      />
+        <Tab.Screen name={'Add office listing'} component={Add_edit_Office} options={{tabBarIcon: () => ( <Ionicons name="add" size={20} />)}}/>
+        <Tab.Screen
+        name={'Settings'} // Add this line
+        component={SettingsScreen} // Add this line
+        options={{
+          tabBarIcon: () => <Ionicons name="settings" size={20} />, // Icon for the settings tab
+        }}
+      />
+    
       </Tab.Navigator>
     </NavigationContainer>
   );
