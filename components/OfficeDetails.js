@@ -72,17 +72,19 @@ return (
     <TouchableOpacity style={styles.button} onPress={confirmDelete}>
       <Text style={styles.buttonText}>Delete</Text>
     </TouchableOpacity>
-    <TouchableOpacity style={styles.button} onPress={handlePay}>
-      <Text style={styles.buttonText}>Pay</Text>
-    </TouchableOpacity>
+    
     {Object.entries(office).map((item, index) => {
       return (
         <View style={styles.row} key={index}>
           <Text style={styles.label}>{item[0]}</Text>
           <Text style={styles.value}>{item[1]}</Text>
+          
         </View>
       );
     })}
+    <TouchableOpacity style={styles.button} onPress={handlePay}>
+      <Text style={styles.buttonPayText}>Pay</Text>
+    </TouchableOpacity>
   </View>
 );
 }
@@ -115,6 +117,11 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 17,
     fontWeight: 'bold',
-
-  }
+  
+  },
+  buttonPayText: {
+    color: 'white',
+    fontSize: 16,
+    verticalAlign: 'bottom'
+},
 });
