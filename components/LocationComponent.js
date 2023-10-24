@@ -88,7 +88,7 @@ function LocationComponent() {
     }
     return (
         <View>
-          <Button style title="update location" onPress={updateLocation} />
+          <Button style title="Show location" onPress={updateLocation} />
           {currentLocation && (
               <Text>
                 {`lat: ${currentLocation.latitude},\nLong:${
