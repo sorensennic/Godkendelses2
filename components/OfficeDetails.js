@@ -1,7 +1,9 @@
 import * as React from 'react';
-import { View, Text, Platform, FlatList, StyleSheet, Button, Alert } from 'react-native';
+import { View, Text, Platform, FlatList, StyleSheet, Button, Alert, TouchableOpacity } from 'react-native';
 import {useEffect, useState} from "react";
 import { getDatabase, ref, remove } from "firebase/database";
+import { useNavigation } from '@react-navigation/native';
+
 
 function OfficeDetails  ({route,navigation})  {
   const [office,setOffice] = useState({});
@@ -15,6 +17,14 @@ function OfficeDetails  ({route,navigation})  {
     }
 
   })
+
+  const handlePay = () => {
+    // Handle logic related to payment here
+
+    // Navigate to PaymentScreen when "Pay" button is pressed
+    navigation.navigate('PaymentScreen');
+  };
+
   
   const handleEdit = () => {
     // Vi navigerer videre til EditOffice skærmen og sender bilen videre med
@@ -56,20 +66,23 @@ if (!office) {
 
 return (
   <View style={styles.container}>
-      <Button title="Edit" onPress={ () => handleEdit()} />
-      <Button title="Delete" onPress={() => confirmDelete()} />
-      {
-          Object.entries(office).map((item,index)=>{
-              return(
-                  <View style={styles.row} key={index}>
-                      {/*Vores office keys navn*/}
-                      <Text style={styles.label}>{item[0]} </Text>
-                      {/*Vores office values navne */}
-                      <Text style={styles.value}>{item[1]}</Text>
-                  </View>
-              )
-          })
-      }
+    <TouchableOpacity style={styles.button} onPress={handleEdit}>
+      <Text style={styles.buttonText}>Edit</Text>
+    </TouchableOpacity>
+    <TouchableOpacity style={styles.button} onPress={confirmDelete}>
+      <Text style={styles.buttonText}>Delete</Text>
+    </TouchableOpacity>
+    <TouchableOpacity style={styles.button} onPress={handlePay}>
+      <Text style={styles.buttonText}>Pay</Text>
+    </TouchableOpacity>
+    {Object.entries(office).map((item, index) => {
+      return (
+        <View style={styles.row} key={index}>
+          <Text style={styles.label}>{item[0]}</Text>
+          <Text style={styles.value}>{item[1]}</Text>
+        </View>
+      );
+    })}
   </View>
 );
 }
@@ -77,12 +90,31 @@ return (
 export default OfficeDetails
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'flex-start' },
-  row: {
-      margin: 5,
-      padding: 5,
-      flexDirection: 'row',
+  container: {
+    flex: 1,
+    padding: 16,
   },
-  label: { width: 100, fontWeight: 'bold' },
-  value: { flex: 1 },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 12,
+    paddingHorizontal: 8,
+  },
+  button: {
+    backgroundColor: 'blue',
+    padding: 12,
+    alignItems: 'center',
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  label: {
+    fontSize: 17,
+    fontWeight: 'bold',
+
+  }
 });

@@ -56,7 +56,7 @@ function OfficeList({navigation}){
     return (
         <FlatList
             data={officeArray}
-            // Vi bruger carKeys til at finde ID på den aktuelle bil og returnerer dette som key, og giver det med som ID til CarListItem
+            // Vi bruger ofifceKeys til at finde ID på den aktuelle office og returnerer dette som key, og giver det med som ID til OfficeListItem
             keyExtractor={(item, index) => officeKeys[index]}
             renderItem={({ item, index }) => {
                
@@ -66,8 +66,8 @@ function OfficeList({navigation}){
                         <Text>
                             Kontor: {item.kontor}  
                         </Text>
-                        <Text>By:{item.by}</Text>
-                        <Text>Addresse:{item.addresse}</Text>
+                        <Text>By: {item.by}</Text>
+                        <Text>Addresse: {item.addresse}</Text>
                         <Text style={styles.itemText}>Tryk for mere info</Text>
                     </TouchableOpacity>
                 )

@@ -11,7 +11,7 @@ import OfficeDetails from './components/OfficeDetails';
 import OfficeList from './components/OfficeList';
 import SettingsScreen from './components/SettingsScreen';
 import LocationComponent from './components/LocationComponent';
-
+import PaymentScreen from './components/PaymentScreen';
 
 export default function App() {
   // Your web app's Firebase configuration
@@ -42,6 +42,7 @@ export default function App() {
           <Stack.Screen name={'Edit Office'} component={Add_edit_Office}/>
           <Stack.Screen name={'Settings'} component={SettingsScreen} />
           <Stack.Screen name={'Map Search'} component={LocationComponent} />
+          <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
         </Stack.Navigator>
     )
   }
@@ -61,7 +62,7 @@ export default function App() {
       />
         <Tab.Screen name={'Add office listing'} component={Add_edit_Office} options={{tabBarIcon: () => ( <Ionicons name="add" size={20} />)}}/>
         <Tab.Screen
-        name={'Settings'} // Add this line
+        name={'User Settings'} // Add this line
         component={SettingsScreen} // Add this line
         options={{
           tabBarIcon: () => <Ionicons name="settings" size={20} />, // Icon for the settings tab

@@ -8,6 +8,7 @@ import {
     Alert,
     ScrollView,
     SafeAreaView,
+    TouchableOpacity
 } from 'react-native';
 //import firebase from 'firebase/compat';
 import {useEffect, useState} from "react";
@@ -110,27 +111,31 @@ function Add_edit_Office({navigation,route}){
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView>
-                {
-                    Object.keys(initialState).map((key,index) =>{
-                        return(
-                            <View style={styles.row} key={index}>
-                                <Text style={styles.label}>{key}</Text>
-                                <TextInput
-                                    value={newOffice[key]}
-                                    onChangeText={(event) => changeTextInput(key,event)}
-                                    style={styles.input}
-                                />
-                            </View>
-                        )
-                    })
-                }
-                {/*Hvis vi er inde på edit office, vis save changes i stedet for add office*/}
-                <Button title={ isEditOffice ? "Save changes" : "Add office"} onPress={() => handleSave()} />
-            </ScrollView>
+          <ScrollView>
+            {/* Text Inputs */}
+            {Object.keys(initialState).map((key, index) => {
+              return (
+                <View style={styles.row} key={index}>
+                  <Text style={styles.label}>{key}</Text>
+                  <TextInput
+                    value={newOffice[key]}
+                    onChangeText={(event) => changeTextInput(key, event)}
+                    style={styles.input}
+                  />
+                </View>
+              );
+            })}
+    
+            {/* Styled Button */}
+            <TouchableOpacity style={styles.button} onPress={() => handleSave()}>
+              <Text style={styles.buttonText}>
+                {isEditOffice ? 'Save changes' : 'Add office'}
+              </Text>
+            </TouchableOpacity>
+          </ScrollView>
         </SafeAreaView>
-    );
-}
+      );
+    }
 
 export default Add_edit_Office;
 
@@ -152,5 +157,16 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         padding:5,
         flex: 1
+    },
+    button: {
+        backgroundColor: 'blue',
+        padding: 12,
+        alignItems: 'center',
+        borderRadius: 8,
+        marginVertical: 12,
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 16,
     },
 });
